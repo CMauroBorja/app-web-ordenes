@@ -21,3 +21,6 @@ Proyecto en desarrollo activo, actualmente en uso en locales reales, en proceso 
 
 ## Proyecto personal
 Sistema desarrollado como proyecto personal productivo para operación comercial real.
+
+## Backend del proyecto
+API REST: https://github.com/CMauroBorja/api-imprimir-flask.git
