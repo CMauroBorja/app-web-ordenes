@@ -1,0 +1,832 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="mobile-web-app-capable" content="yes">
+  <link rel="icon" type="image/png"
+    href="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcShYG2v06ySCvlUjVSMfPU0puaSX6SdDqMyqg&s">
+  <title>El imperio de los bolsos</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+      background-color: rgba(13, 148, 96, 0.933);
+    }
+
+    .container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      min-height: 100vh;
+    }
+
+    .header {
+      width: calc(100% - 40px);
+      max-width: 500px;
+      margin-top: 20px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background-color: white;
+      border-radius: 10px;
+      padding: 10px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.25);
+    }
+
+    .header img {
+      width: 100%;
+      height: auto;
+      max-height: 200px;
+      object-fit: contain;
+    }
+
+    .form-container {
+      display: flex;
+      background-color: #fff;
+      border-radius: 10px;
+      padding: 10px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.25);
+      margin-top: 10px;
+      width: calc(100% - 40px);
+      max-width: 500px;
+      align-items: center;
+    }
+
+    #createEmployeeContainer {
+      /*display: none; /* Ocultar el contenedor por defecto */
+      background-color: transparent; /* Cambiar a transparente */
+      border-color: transparent;
+      box-shadow: none;
+    }
+    
+    .createEmployeeButton {
+      background-color: #000;
+      color: #FFD700;
+      font-weight: bold;
+      text-transform: uppercase;
+      cursor: pointer;
+      padding: 10px;
+      border: none;
+      border-radius: 5px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.25);
+      box-sizing: border-box;
+      width: 100%; /* Ajustar al ancho del contenedor */
+    }
+
+    input[type="checkbox"], input[type="radio"] {
+      width: 20px;
+      height: 20px;
+      margin: 0;
+      border: 1px solid goldenrod;
+      border-radius: 3px;
+      cursor: pointer;
+      accent-color: goldenrod;
+    }
+
+    .checkbox-container, .radio-container {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      margin-bottom: 10px;
+      white-space: nowrap;
+    }
+
+    .checkbox-container input[type="checkbox"], 
+    .radio-container input[type="radio"] {
+      margin: 0;
+    }
+
+    /* Contenedor para agrupar medio de pago */
+    .payment-method-group {
+      display: flex;
+      gap: 15px;
+      flex-wrap: wrap;
+      margin-bottom: 10px;
+    }
+
+    /* Contenedor flex para cantidad y medio de pago */
+    .inline-group {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .inline-group > div {
+      flex: 1;
+    }
+
+    .inline-group input[type="number"] {
+      flex: 1;
+      min-width: 80px;
+    }
+
+    input,
+    textarea,
+    button,
+    select {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 10px;
+      border: 1px solid goldenrod;
+      border-radius: 5px;
+      box-sizing: border-box;
+    }
+
+    button {
+      background-color: #000;
+      color: #FFD700;      
+      font-weight: bold;
+      text-transform: uppercase;
+      cursor: pointer;
+    }
+
+    .voice-container {
+      position: relative;
+      display: flex;
+      width: 100%;
+    }
+
+    textarea#observaciones {
+      flex: 1;
+      padding-right: 60px;
+      border: 1px solid goldenrod;
+      border-radius: 5px;
+      resize: vertical;
+      box-sizing: border-box;
+      min-height: 100px;
+      font-family: Arial, sans-serif;
+      font-size: 14px;
+    }
+
+    .voice-button-wrapper {
+      position: absolute;
+      right: 10px;
+      bottom: 10px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      z-index: 2;
+    }
+
+    #voiceButton {
+      background-color: #000;
+      color: #FFD700;
+      border: none;
+      border-radius: 50%;
+      padding: 8px;
+      font-size: 16px;
+      width: 36px;
+      height: 36px;
+      cursor: pointer;
+      box-shadow: 0 0 4px rgba(0, 0, 0, 0.3);
+    }
+
+    #voiceButton.recording {
+      background-color: red;
+      color: white;
+    }
+
+    .wave {
+      display: flex;
+      gap: 2px;
+      justify-content: center;
+      align-items: flex-end;
+      height: 12px;
+    }
+
+    .wave.hidden {
+      display: none;
+    }
+
+    .wave span {
+      display: block;
+      width: 3px;
+      height: 10px;
+      background-color: red;
+      animation: wave 1s infinite ease-in-out;
+    }
+
+    .wave span:nth-child(2) {
+      animation-delay: 0.2s;
+    }
+
+    .wave span:nth-child(3) {
+      animation-delay: 0.4s;
+    }
+
+    @keyframes wave {
+
+      0%,
+      100% {
+        transform: scaleY(1);
+      }
+
+      50% {
+        transform: scaleY(2.2);
+      }
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      overflow: auto;
+      background-color: rgba(0, 0, 0, 0.5);
+    }
+
+    .modal-content {
+      background-color: #fff;
+      margin: 10% auto;
+      padding: 20px;
+      border: 1px solid #888;
+      border-radius: 10px;
+      width: 90%;
+      max-width: 400px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.25);
+    }
+
+    .modal-header {
+      font-size: 18px;
+      font-weight: bold;
+      margin-bottom: 10px;
+      text-align: center;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <!-- Encabezado con logo -->
+    <div class="header">
+      <img src="img/logoImperio.png" alt="El imperio de los bolsos">
+    </div>
+
+    <!-- Botón para crear empleados-->
+    <!-- Contenedor del botón para crear empleados -->
+    <div class="form-container" id="createEmployeeContainer">
+      <button class="createEmployeeButton" id="createEmployeeButton">Crear Empleado</button>
+    </div>
+
+    <!-- Formulario de orden -->
+    <div class="form-container">
+      <form id="orderForm">
+        <label for="nombreCliente">Nombre Cliente:</label>
+        <input type="text" id="nombreCliente" name="nombreCliente" required>
+
+        <label for="fechaEntrega">Fecha de Entrega:</label>
+        <input type="datetime-local" id="fechaEntrega" name="fechaEntrega" required>
+        
+        <label for="valorTotal">Valor Total:</label>
+        <input type="text" id="valorTotal" name="valorTotal" required>
+
+        <label for="abono">Abono:</label>
+        <input type="text" id="abono" name="abono" required>
+
+        <!-- Medio de pago -->
+        <div class="inline-group">
+            <div>
+                <label>Medio de Pago:</label>
+                <div class="payment-method-group">
+                 <label class="radio-container">
+                   <input type="radio" id="efectivo" name="medioPago" value="efectivo" checked>
+                   Efectivo
+                 </label>
+                 <label class="radio-container">
+                   <input type="radio" id="transferencia" name="medioPago" value="transferencia">
+                   Transferencia
+                 </label>
+                 <label class="radio-container">
+                   <input type="radio" id="tarjeta" name="medioPago" value="tarjeta">
+                   Tarjeta
+                 </label>
+                </div> 
+            </div>
+        </div>
+
+        <label for="saldo">Saldo:</label>
+        <input type="text" id="saldo" name="saldo" readonly>
+
+        <label for="celular">Celular:</label>
+        <div style="display: flex; gap: 10px; align-items: center;">
+          <input type="tel" id="celular" name="celular" pattern="^\d{10}$" required placeholder="10 dígitos" style="flex: 1;">
+          <label class="checkbox-container">
+            <input type="checkbox" id="tieneWhatsapp" name="tieneWhatsapp">
+            Tiene WhatsApp
+          </label>
+        </div>
+
+        <label for="telefono">Teléfono:</label>
+        <input type="tel" id="telefono" name="telefono" placeholder="Opcional" pattern="^\d*$">
+
+        <label for="cantidadObjetos">Cantidad:</label>
+        <input type="number" id="cantidadObjetos" name="cantidadObjetos" min="1" value="1" required>
+
+        <label for="observaciones">Articulo para:</label>
+        <div class="voice-container">
+          <textarea id="observaciones" name="observaciones" rows="4" maxlength="500"
+            placeholder="Escribe o dicta para que se recibe el articulo..."></textarea>
+          <div class="voice-button-wrapper">
+            <button type="button" id="voiceButton">🎤</button>
+            <div class="wave hidden" id="waveIndicator">
+              <span></span><span></span><span></span>
+            </div>
+          </div>
+        </div>
+        <!-- Contador de caracteres -->
+        <div style="text-align: right; font-size: 12px; color: #666; margin-top: -8px; margin-bottom: 10px;">
+          <span id="charCounter">0/500</span>
+        </div>
+
+        <label for="vendedorSelect">vendedor:</label>
+        <select id="vendedorSelect" name="vendedor" required>
+          <option value="">Seleccione un empleado</option>
+        </select>
+
+        <button type="submit">Enviar Orden</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal de inicio de sesión -->
+  <div id="loginModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">Inicio de Sesión</div>
+      <form id="loginForm" autocomplete="off">
+        <input type="text" id="codigo" name="codigo" placeholder="Código de usuario" required autocomplete="off">
+        <input type="password" id="contrasena" name="contrasena" placeholder="Contraseña" required autocomplete="off">
+        <button type="submit">Iniciar Sesión</button>
+        <button type="button" id="exitButton">Salir</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal para crear empleados -->
+  <div id="createEmployeeModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">Crear Empleado</div>
+      <form id="createEmployeeForm">
+        <input type="text" id="codigoEmpleado" name="codigoEmpleado" placeholder="Código de usuario" required>
+        <input type="password" id="contrasenaEmpleado" name="contrasenaEmpleado" placeholder="Contraseña" required>
+        <input type="text" id="nombreEmpleado" name="nombreEmpleado" placeholder="Nombre del empleado" required>
+        <input type="text" id="telefonoEmpleado" name="telefonoEmpleado" placeholder="Teléfono" required>
+        <label style="display: flex; align-items: center; gap: 5px;">
+          Administrador
+          <input type="checkbox" id="administradorEmpleado" name="administradorEmpleado">
+        </label>
+        <button type="submit" id="createEmployeeSubmitButton">Crear Empleado</button>
+        <button type="button" id="closeCreateEmployeeModal">Cancelar</button>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    // ================== Variables globales ==================
+    const urlGlobal = '192.168.1.100:8080';
+    const loginModal = document.getElementById('loginModal');
+    const createEmployeeModal = document.getElementById('createEmployeeModal');
+    const createEmployeeButton = document.getElementById('createEmployeeButton');
+    const createEmployeeForm = document.getElementById('createEmployeeForm');
+    const closeCreateEmployeeModal = document.getElementById('closeCreateEmployeeModal');
+    const loginForm = document.getElementById('loginForm');
+    const exitButton = document.getElementById('exitButton');
+    const form = document.getElementById('orderForm');
+    let vendedorCodigo = null;
+    let esAdministrador = false;
+    const valorInput = document.getElementById('valorTotal');
+    const abonoInput = document.getElementById('abono');
+    const saldoInput = document.getElementById('saldo');
+
+    // Contador de caracteres para observaciones
+    const observacionesTextarea = document.getElementById('observaciones');
+    const charCounter = document.getElementById('charCounter');
+
+    observacionesTextarea.addEventListener('input', function() {
+      const currentLength = this.value.length;
+      charCounter.textContent = `${currentLength}/500`;
+      
+      // Cambiar color si está cerca del límite
+      if (currentLength > 450) {
+        charCounter.style.color = '#f44336'; // Rojo
+      } else if (currentLength > 400) {
+        charCounter.style.color = '#ff9800'; // Naranja
+      } else {
+        charCounter.style.color = '#666'; // Gris normal
+      }
+    });
+
+    [valorInput, abonoInput].forEach(input => {
+      input.addEventListener('input', () => {
+        const rawValor = parseNumber(valorInput.value);
+        const rawAbono = parseNumber(abonoInput.value);
+        const saldo = rawValor - rawAbono;
+
+        // Actualiza los valores formateados
+        valorInput.value = formatNumber(valorInput.value);
+        abonoInput.value = formatNumber(abonoInput.value);
+        saldoInput.value = saldo > 0 ? saldo.toLocaleString('es-CO') : '0';
+      });
+    });
+
+    const vendedorSelect = document.getElementById('vendedorSelect');
+
+    async function cargarEmpleados() {
+      try {
+        const response = await fetch(`http://${urlGlobal}/getAllEmployees`);
+        if (response.ok) {
+          const empleados = await response.json();
+          vendedorSelect.innerHTML = '<option value=""></option>';
+          empleados.forEach(emp => {
+            const option = document.createElement('option');
+            option.value = emp.codigo;
+            option.textContent = emp.nombre;
+            vendedorSelect.appendChild(option);
+          });
+        } else {
+          alert("Error al obtener la lista de empleados.");
+        }
+      } catch (error) {
+        console.error("Error al cargar empleados:", error);
+      }
+    }
+
+    cargarEmpleados();
+
+    // ================== Funciones auxiliares ==================
+    function isMobile() {
+      return /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+    }
+
+    function formatoFecha(fecha) {
+      return `${fecha.getFullYear()}-${(fecha.getMonth() + 1).toString().padStart(2, '0')}-${fecha.getDate().toString().padStart(2, '0')} ${fecha.getHours().toString().padStart(2, '0')}:${fecha.getMinutes().toString().padStart(2, '0')}`;
+    }
+
+    function formatNumber(value) {
+      const number = parseInt(value.replace(/\./g, '').replace(/,/g, '.'));
+      return isNaN(number) ? '' : number.toLocaleString('es-CO');
+    }
+
+    function parseNumber(value) {
+      return parseInt(value.replace(/\./g, '').replace(/,/g, '')) || 0;
+    }
+
+    // ================== Inicio de sesión ==================
+    exitButton.addEventListener('click', () => {
+      loginModal.style.display = 'none';
+    });
+
+    loginForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const data = {
+        codigo: loginForm.codigo.value.trim(),
+        contrasena: loginForm.contrasena.value.trim(),
+      };
+
+      try {
+        const response = await fetch(`http://${urlGlobal}/login`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data),
+        });
+
+        if (response.ok) {
+          const result = await response.json();
+          vendedorCodigo = result.codigo;
+          esAdministrador = result.administrador;
+          loginModal.style.display = 'none';
+
+          if (esAdministrador) {
+            createEmployeeModal.style.display = 'block';
+            createEmployeeForm.reset();
+            codigoEmpleadoInput.disabled = false;
+            submitButton.textContent = "Crear Empleado";
+            createEmployeeForm.removeAttribute('data-edit');
+          } else {
+            alert('Solo los administradores pueden crear empleados.');
+          }
+        } else if (response.status === 401) {
+          alert('Código o contraseña incorrectos.');
+        } else {
+          const error = await response.json();
+          alert(`Error: ${error.error}`);
+        }
+      } catch (error) {
+        alert('No se pudo conectar con el servidor.');
+        console.error(error);
+      }
+    });
+
+  // ================== Crear/Editar empleado ==================
+const codigoEmpleadoInput = document.getElementById('codigoEmpleado');
+const submitButton = document.getElementById('createEmployeeSubmitButton');
+
+// Al hacer clic en el botón, abrir el modal en modo crear
+createEmployeeButton.addEventListener('click', () => {
+  loginForm.reset();
+  loginModal.style.display = 'block';
+});
+
+// Al cerrar el modal, limpiar y resetear el formulario
+closeCreateEmployeeModal.addEventListener('click', () => {
+  createEmployeeModal.style.display = 'none';
+  createEmployeeForm.reset();
+  codigoEmpleadoInput.disabled = false;
+  submitButton.textContent = "Crear Empleado";
+  createEmployeeForm.removeAttribute('data-edit');
+});
+
+// Al salir del campo código, buscar si existe el empleado
+codigoEmpleadoInput.addEventListener('blur', async () => {
+  const codigo = codigoEmpleadoInput.value.trim();
+  if (!codigo) return;
+
+  try {
+    const response = await fetch(`http://${urlGlobal}/getEmployee/${codigo}`);
+    if (response.ok) {
+      // El empleado existe, llenar datos y cambiar a modo edición
+      const empleado = await response.json();
+      document.getElementById('nombreEmpleado').value = empleado.nombre;
+      document.getElementById('telefonoEmpleado').value = empleado.telefono;
+      document.getElementById('contrasenaEmpleado').value = ""; // Por seguridad
+      document.getElementById('administradorEmpleado').checked = empleado.administrador;
+      codigoEmpleadoInput.disabled = true;
+      submitButton.textContent = "Editar Empleado";
+      createEmployeeForm.setAttribute('data-edit', 'true');
+    } else {
+      // No existe, limpiar y modo crear
+      document.getElementById('nombreEmpleado').value = "";
+      document.getElementById('telefonoEmpleado').value = "";
+      document.getElementById('contrasenaEmpleado').value = "";
+      document.getElementById('administradorEmpleado').checked = false;
+      codigoEmpleadoInput.disabled = false;
+      submitButton.textContent = "Crear Empleado";
+      createEmployeeForm.removeAttribute('data-edit');
+    }
+  } catch (error) {
+    alert('Error al buscar el empleado.');
+  }
+});
+
+// Al enviar el formulario
+createEmployeeForm.addEventListener('submit', async (e) => {
+  e.preventDefault();
+
+  const data = {
+    nombre: createEmployeeForm.nombreEmpleado.value.trim(),
+    telefono: createEmployeeForm.telefonoEmpleado.value.trim(),
+    codigo: createEmployeeForm.codigoEmpleado.value.trim(),
+    contrasena: createEmployeeForm.contrasenaEmpleado.value.trim(),
+    administrador: createEmployeeForm.administradorEmpleado.checked,
+  };
+
+  const isEdit = createEmployeeForm.hasAttribute('data-edit');
+  const url = isEdit
+    ? `http://${urlGlobal}/updateEmployee/${data.codigo}`
+    : `http://${urlGlobal}/createEmployee`;
+  const method = isEdit ? 'PUT' : 'POST';
+
+  try {
+    const response = await fetch(url, {
+      method,
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    });
+
+    if (response.ok) {
+      alert(isEdit ? 'Empleado actualizado con éxito.' : 'Empleado creado con éxito.');
+      cargarEmpleados();
+      createEmployeeForm.reset();
+      createEmployeeModal.style.display = 'none';
+      codigoEmpleadoInput.disabled = false;
+      submitButton.textContent = "Crear Empleado";
+      createEmployeeForm.removeAttribute('data-edit');
+    } else {
+      const error = await response.json();
+      alert(`Error: ${error.error}`);
+    }
+  } catch (error) {
+    alert('No se pudo conectar con el servidor.');
+  }
+});
+
+    // ================== Envío de órdenes ==================
+    form.addEventListener('input', () => {
+      const valor = parseInt(form.valorTotal.value.replace(/\./g, '')) || 0;
+      const abono = parseInt(form.abono.value.replace(/\./g, '')) || 0;
+      const saldo = valor - abono;
+
+      form.saldo.value = saldo.toLocaleString('es-CO');
+    });
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const celular = form.celular.value;
+      if (!/^\d{10}$/.test(celular)) {
+        alert('El número de celular debe tener exactamente 10 dígitos.');
+        return;
+      }
+
+      // Validar longitud de observaciones
+      const observaciones = form.observaciones.value.trim();
+      if (observaciones.length > 500) {
+        alert('Las observaciones no pueden exceder 500 caracteres. Actualmente tiene ' + observaciones.length + ' caracteres.');
+        return;
+      }
+
+      // Mostrar advertencia si está cerca del límite
+      if (observaciones.length > 450) {
+        if (!confirm(`Las observaciones tienen ${observaciones.length} caracteres. El límite es 500. ¿Desea continuar?`)) {
+          return;
+        }
+      }
+
+      const fechaEntregaFormatted = formatoFecha(new Date(form.fechaEntrega.value));
+
+      // Obtener medio de pago seleccionado
+      const medioPagoElement = document.querySelector('input[name="medioPago"]:checked');
+      const medioPago = medioPagoElement ? medioPagoElement.value : 'efectivo';
+
+      // Logging detallado de las observaciones
+      const observacionesValue = form.observaciones.value;
+      //console.log('🔍 Frontend - Observaciones originales:', observacionesValue);
+      //console.log('🔍 Frontend - Longitud original:', observacionesValue.length);
+      //console.log('🔍 Frontend - Observaciones después de trim:', observacionesValue.trim());
+      //console.log('🔍 Frontend - Longitud después de trim:', observacionesValue.trim().length);
+
+      const data = {
+        nombreCliente: form.nombreCliente.value.trim(),
+        fechaEntrega: fechaEntregaFormatted,
+        valorTotal: parseNumber(form.valorTotal.value),
+        abono: parseNumber(form.abono.value),
+        saldo: parseNumber(form.saldo.value),
+        celular: celular,
+        tieneWhatsapp: form.tieneWhatsapp.checked,
+        telefono: form.telefono.value || null,
+        observaciones: observaciones, // Ya está limpio con trim()
+        vendedor: form.vendedor.value,
+        medioPago: medioPago,
+        cantidadObjetos: parseInt(form.cantidadObjetos.value) || 1
+      };
+
+      // Logging del objeto completo que se enviará
+      //console.log('🔍 Frontend - Datos completos a enviar:', JSON.stringify(data, null, 2));
+      //console.log('🔍 Frontend - Observaciones en data:', data.observaciones);
+      //console.log('🔍 Frontend - Longitud observaciones en data:', data.observaciones.length);
+
+      try {
+        //console.log('📤 Enviando datos al servidor...');
+        
+        const response = await fetch(`http://${urlGlobal}/submitData`, {
+          method: 'POST',
+          headers: { 
+            'Content-Type': 'application/json; charset=utf-8' // Asegurar UTF-8
+          },
+          body: JSON.stringify(data),
+        });
+
+        //console.log('📥 Respuesta del servidor:', response.status);
+
+        if (response.ok) {
+          const result = await response.json();
+          //console.log('✅ Respuesta exitosa:', result);
+          
+          form.reset();
+          // Resetear valores por defecto después del reset
+          document.getElementById('cantidadObjetos').value = 1;
+          document.getElementById('efectivo').checked = true;
+          // Resetear contador de caracteres
+          charCounter.textContent = '0/500';
+          charCounter.style.color = '#666';
+          
+          // Generar mensaje para WhatsApp
+          if (data.tieneWhatsapp) {
+            const fechaEntrega = new Date(data.fechaEntrega);
+            const fecha = fechaEntrega.toLocaleDateString('es-CO', { 
+              year: 'numeric', 
+              month: '2-digit', 
+              day: '2-digit' 
+            });
+            const hora = fechaEntrega.toLocaleTimeString('es-CO', { 
+              hour: '2-digit', 
+              minute: '2-digit',
+              hour12: true 
+            }).toUpperCase();
+            
+            // ASEGURAR que se usa el valor original completo para WhatsApp
+            const mensaje = `
+            💜 *Nueva Orden de Arreglo* 💜
+            🧾 *N° Orden:* ${result.id}
+            👤 *Cliente:* ${data.nombreCliente}
+            💰 *Valor:* ${data.valorTotal.toFixed(2)}
+            💳 *Abono:* ${data.abono.toFixed(2)}
+            💵 *Saldo:* ${data.saldo.toFixed(2)}
+            💳 *Medio de Pago:* ${data.medioPago.toUpperCase()}
+            🔢 *Cantidad:* ${data.cantidadObjetos}
+            📝 *Articulo para:* ${observacionesValue.trim()}
+            
+            ⚠️ *RECUERDE* ⚠️
+            _Su artículo podrá ser reclamado el día_
+            📅 *${fecha}*
+            _A partir de las_
+            ⏰ *${hora}*
+
+            ⚠️ *IMPORTANTE* ⚠️
+            *PASADOS 30 DÍAS*
+            *NO SE RESPONDE POR ARTICULO.*
+            *NO SE HACE DEVOLUCION DE DINERO.*
+            `;
+            
+            //console.log('📱 Mensaje WhatsApp generado:', mensaje);
+            //console.log('📱 Observaciones en mensaje WhatsApp:', observacionesValue.trim());
+            
+            // Codificar mensaje para URL
+            const mensajeCodificado = encodeURIComponent(mensaje.trim());
+
+            // Abrir chat de WhatsApp con el número del cliente
+            const urlWhatsapp = `https://wa.me/57${data.celular}?text=${mensajeCodificado}`;
+            window.open(urlWhatsapp, '_blank');
+          }
+        } else {
+          const error = await response.json();
+          console.error('❌ Error del servidor:', error);
+          alert(`Error: ${error.error}`);
+        }
+      } catch (error) {
+        console.error('❌ Error de conexión:', error);
+        alert('No se pudo conectar con el servidor.');
+      }
+    });
+
+    // ================== Reconocimiento de voz ==================
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+    if (SpeechRecognition && !isMobile()) {
+      const recognition = new SpeechRecognition();
+      recognition.lang = 'es-ES';
+      recognition.continuous = false;
+      recognition.interimResults = false;
+
+      const observacionesInput = document.getElementById("observaciones");
+      const voiceButton = document.getElementById("voiceButton");
+      const wave = document.getElementById("waveIndicator");
+      let isRecording = false;
+
+      voiceButton.addEventListener("click", () => {
+        if (!isRecording) {
+          recognition.start();
+          voiceButton.textContent = "⹁";
+          voiceButton.classList.add("recording");
+          wave.classList.remove("hidden");
+          isRecording = true;
+        } else {
+          recognition.stop();
+        }
+      });
+
+      recognition.addEventListener("result", (event) => {
+        const transcript = event.results[0][0].transcript;
+        observacionesInput.value += (observacionesInput.value ? " " : "") + transcript;
+        // Actualizar contador después del reconocimiento de voz
+        const currentLength = observacionesInput.value.length;
+        charCounter.textContent = `${currentLength}/500`;
+        if (currentLength > 450) {
+          charCounter.style.color = '#f44336';
+        } else if (currentLength > 400) {
+          charCounter.style.color = '#ff9800';
+        } else {
+          charCounter.style.color = '#666';
+        }
+      });
+
+      recognition.addEventListener("end", () => {
+        voiceButton.textContent = "🎤";
+        voiceButton.classList.remove("recording");
+        wave.classList.add("hidden");
+        isRecording = false;
+      });
+
+      recognition.addEventListener("error", (event) => {
+        alert("Error al reconocer la voz: " + event.error);
+        voiceButton.textContent = "🎤";
+        voiceButton.classList.remove("recording");
+        wave.classList.add("hidden");
+        isRecording = false;
+      });
+    } else {
+      document.getElementById('voiceButton').style.display = 'none';
+      document.getElementById('waveIndicator').style.display = 'none';
+    }
+  </script>
+</body>
+
+</html>

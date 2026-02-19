@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/png"
+    href="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcShYG2v06ySCvlUjVSMfPU0puaSX6SdDqMyqg&s">
+  <title>Órdenes Registradas</title>
+  <style>
+    /* ESTRUCTURA GENERAL */
+    body {
+      display: flex;
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+      background-color: rgba(13, 148, 96, 0.933);
+      min-height: 100vh;
+    }
+  
+    .container {
+      flex: 1;
+      margin: 20px;
+      padding: 20px;
+      background-color: #fff;
+      border-radius: 10px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      overflow-x: auto; 
+      }
+  
+    /* TIPOGRAFÍA Y ENCABEZADOS */
+    h1 {
+      text-align: center;
+      color: #333;
+    }
+  
+    /* TABLAS */
+    table {
+      width: 100%;
+      min-width: 1000px; /* Ancho mínimo para asegurar legibilidad */
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+  
+    table th,
+    table td {
+      border: 1px solid #ddd;
+      padding: 10px;
+      text-align: left;
+    }
+  
+    table th {
+      background-color: #000;
+      color: #FFD700;
+      text-transform: uppercase;
+    }
+  
+    table tr:nth-child(even) {
+      background-color: #f9f9f9;
+    }
+  
+    table tr:hover {
+      background-color: #f1f1f1;
+    }
+  
+    /* ESTADOS DEL SISTEMA */
+    .loading {
+      text-align: center;
+      font-size: 18px;
+      color: #555;
+    }
+  
+    .error {
+      text-align: center;
+      font-size: 18px;
+      color: red;
+    }
+  
+    /* BOTONES Y ACCIONES */
+    .action-buttons {
+      display: flex;
+      gap: 5px;
+      flex-wrap: wrap;
+    }
+
+    .action-buttons button {
+      flex: 1;
+      min-width: 80px;
+      white-space: nowrap;
+    }
+  
+    .edit-button {
+      background-color: #4CAF50;
+      color: white;
+    }
+  
+    .delete-button {
+      background-color: #f44336;
+      color: white;
+    }
+  
+    .save-button,
+    .save-abono-button {
+      background-color: #008CBA;
+      color: white;
+    }
+  
+    .cancel-button {
+      background-color: #f0ad4e;
+      color: white;
+    }
+  
+    .add-payment-button {
+      background-color: #FFD700;
+      color: black;
+    }
+
+    .reprint-button {
+      background-color: #17a2b8;
+      color: white;
+    }
+  
+    button {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 10px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      box-sizing: border-box;
+      background-color: #000;
+      color: #FFD700;
+      font-weight: bold;
+      text-transform: uppercase;
+      cursor: pointer;
+    }
+  
+    /* FORMULARIOS Y CAMPOS */
+    input {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 10px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      box-sizing: border-box;
+    }
+
+    .search-bar {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin: 20px 0;
+    }
+
+    .search-bar select {
+      min-width: 150px;
+      flex: 0 0 auto;
+    }
+
+    .search-bar input {
+      flex: 1;
+      min-width: 200px;
+      max-width: 400px;
+    }   
+  
+    /* MEDIA QUERIES */
+    @media screen and (max-width: 1366px) {
+      .container {
+        margin: 10px;
+        padding: 10px;
+      }
+
+      table th,
+      table td {
+        padding: 8px;
+        font-size: 14px;
+      }
+    }
+
+    @media screen and (max-width: 1024px) {
+      table th,
+      table td {
+        padding: 6px;
+        font-size: 13px;
+      }
+
+      .action-buttons button {
+        padding: 4px 8px;
+        font-size: 12px;
+      }
+    }
+
+    /* MODALES */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      overflow: auto;
+      background-color: rgba(0, 0, 0, 0.5);
+    }
+  
+    .modal-content {
+      width: 90%;
+      max-width: 400px;
+      margin: 5% auto;
+    }
+  
+    .modal-header {
+      font-size: 18px;
+      font-weight: bold;
+      margin-bottom: 10px;
+      text-align: center;
+    }
+  
+    /* CONTENEDORES ADICIONALES */
+    .voice-container {
+      position: relative;
+      display: flex;
+      width: 100%;
+    }
+
+    /* Ajustes para alto contraste y accesibilidad */
+    table th {
+      background-color: #000;
+      color: #FFD700;
+      font-weight: bold;
+    }
+
+    input:focus,
+    button:focus,
+    select:focus {
+      outline: 2px solid #FFD700;
+      outline-offset: 2px;
+    }
+
+    /* Mejoras en la visualización de checkboxes */
+    .finalizada-checkbox {
+      width: 20px;
+      height: 20px;
+      cursor: pointer;
+      accent-color: #4CAF50;
+    }
+
+    @media screen and (min-width: 1920px) {
+    .container {
+      max-width: 1800px;
+      margin: 20px auto;
+    }
+
+    table th,
+    table td {
+      padding: 12px;
+      font-size: 16px;
+    }
+  }
+  </style>
+  
+</head>
+
+<body>
+  <!-- CONTENEDOR PRINCIPAL -->
+<div class="container">
+  <h1>Órdenes Registradas</h1>
+
+  <!-- BÚSQUEDA -->
+  <div class="search-bar">
+    <select id="searchField">
+      <option value="id">Buscar por ID</option>
+      <option value="nombre">Buscar por Nombre</option>
+      <option value="celular">Buscar por Celular</option>
+    </select>
+    <input type="text" id="searchInput" placeholder="Escribe para buscar...">
+  </div>
+
+  <!-- MENSAJES DE CARGA Y ERROR -->
+  <div id="loading" class="loading">Cargando órdenes...</div>
+  <div id="error" class="error" style="display: none;">Error al cargar las órdenes.</div>
+
+  <!-- TABLA DE ÓRDENES -->
+  <table id="ordersTable" style="display: none;">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Nombre Cliente</th>
+        <th>Fecha de Entrega</th>
+        <th>Fecha de Creación</th>
+        <th>Valor Total</th>
+        <th>Abono</th>
+        <th>Saldo</th>
+        <th>Celular</th>
+        <th>Teléfono</th>
+        <th>Observaciones</th>
+        <th>Finalizada</th>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+</div>
+
+<!-- MODAL DE INICIO DE SESIÓN -->
+<div id="loginModal" class="modal" style="display: block;">
+  <div class="modal-content">
+    <div class="modal-header">Inicio de Sesión</div>
+    <form id="loginForm">
+      <input type="text" id="codigo" name="codigo" placeholder="Código de usuario" required>
+      <input type="password" id="contrasena" name="contrasena" placeholder="Contraseña" required>
+      <button type="submit">Iniciar Sesión</button>
+      <button type="button" id="exitButton">Salir</button>
+    </form>
+  </div>
+</div>
+<script>
+  // ================== CONFIGURACIÓN ==================
+  const urlLocal = "192.168.1.100:8080";
+  const apiUrl = `http://${urlLocal}/getOrders`;
+  const updateUrl = `http://${urlLocal}/updateOrder`;
+  const deleteUrl = `http://${urlLocal}/deleteOrder`;
+
+  const loadingElement = document.getElementById("loading");
+  const errorElement = document.getElementById("error");
+  const ordersTable = document.getElementById("ordersTable");
+  const tableBody = ordersTable.querySelector("tbody");
+
+  let vendedorCodigo = null; // Código del vendedor
+  let esAdministrador = false; // Si el usuario es administrador
+
+  // ================== INICIO DE SESIÓN ==================
+  const loginForm = document.getElementById("loginForm");
+  const loginModal = document.getElementById("loginModal");
+  const exitButton = document.getElementById("exitButton");
+
+  window.onload = () => {
+    loginModal.style.display = "block"; // Mostrar el modal de inicio de sesión
+  };
+
+  exitButton.addEventListener("click", () => {
+    window.close(); // Cierra la pestaña
+  });
+
+  loginForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const data = {
+      codigo: loginForm.codigo.value.trim(),
+      contrasena: loginForm.contrasena.value.trim(),
+    };
+
+    try {
+      const response = await fetch(`http://${urlLocal}/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        if (!result.administrador) {
+          alert("Acceso denegado: Solo administradores pueden acceder a esta sección.");
+          loginForm.reset();
+          return;
+        }
+        vendedorCodigo = result.codigo;
+        esAdministrador = result.administrador;
+        loginModal.style.display = "none";
+        loadOrders();
+      } else {
+        const error = await response.json();
+        alert(`Error: ${error.error}`);
+      }
+    } catch (error) {
+      alert("No se pudo conectar con el servidor.");
+      console.error(error);
+    }
+  });
+
+  // ================== CARGAR ÓRDENES ==================
+async function loadOrders() {
+  try {
+    const response = await fetch(apiUrl);
+    if (!response.ok) throw new Error("Error al obtener las órdenes.");
+    const orders = await response.json();
+
+    loadingElement.style.display = "none";
+    ordersTable.style.display = "table";
+    tableBody.innerHTML = "";
+
+    const filteredOrders = esAdministrador
+      ? orders
+      : orders.filter((order) => order.vendedor === vendedorCodigo);
+
+    filteredOrders.forEach((order) => {
+      const row = document.createElement("tr");
+      row.innerHTML = `
+        <td>${order.id}</td>
+        <td contenteditable="false" data-original="${order.nombreCliente}">${order.nombreCliente}</td>
+        <td contenteditable="false" data-original="${order.fechaEntrega}">${order.fechaEntrega}</td>
+        <td>${order.fechaCreacion}</td>
+        <td contenteditable="true" data-original="${order.valorTotal}">${order.valorTotal}</td>
+        <td contenteditable="true" data-original="${order.abono}">${order.abono}</td>
+        <td>${order.saldo}</td>
+        <td contenteditable="true" data-original="${order.celular}">${order.celular}</td>
+        <td contenteditable="true" data-original="${order.telefono || "No proporcionado"}">${order.telefono || "No proporcionado"}</td>
+        <td contenteditable="true" data-original="${order.observaciones}">${order.observaciones}</td>
+        <td>
+          <input type="checkbox" class="finalizada-checkbox" ${order.finalizada ? "checked" : ""} data-id="${order.id}" data-original="${order.finalizada}" disabled>
+        </td>
+        <td class="action-buttons">
+          <button class="edit-button">Editar</button>
+          <button class="delete-button">Eliminar</button>
+          <button class="add-payment-button">+ Abono</button>
+          <button class="reprint-button">Reimprimir</button>
+        </td>
+      `;
+      tableBody.appendChild(row);
+
+      const editButton = row.querySelector(".edit-button");
+      const deleteButton = row.querySelector(".delete-button");
+      const addPaymentButton = row.querySelector(".add-payment-button");
+      const reprintButton = row.querySelector(".reprint-button");
+
+      editButton.onclick = () => editRow(editButton);
+      deleteButton.onclick = () => deleteOrder(order.id);
+      addPaymentButton.onclick = () => addPayment(order.id, addPaymentButton);
+      reprintButton.onclick = () => reprintOrder(order.id);
+
+      // Evento para el checkbox de finalizada
+      const finalizadaCheckbox = row.querySelector(".finalizada-checkbox");
+      finalizadaCheckbox.addEventListener("change", function () {
+        if (!this.disabled) {  // Solo si está habilitado (en modo edición)
+          if (this.checked) {
+            if (!confirm("¿Está seguro de marcar esta orden como finalizada?")) {
+              this.checked = false;
+            }
+          }
+        }
+      });
+    });
+  } catch (error) {
+    loadingElement.style.display = "none";
+    errorElement.style.display = "block";
+    errorElement.textContent = error.message;
+  }
+}
+
+  // ================== FUNCIONES DE EDICIÓN ==================
+  function editRow(button) {
+    const row = button.closest("tr");
+    const deleteButton = row.querySelector(".delete-button") || row.querySelector(".cancel-button");
+    const addPaymentButton = row.querySelector(".add-payment-button");
+    const finalizadaCheckbox = row.querySelector(".finalizada-checkbox");
+    const cells = row.querySelectorAll("td[contenteditable='false'], td[contenteditable='true']");
+    const isEditing = button.classList.contains("save-button");
+
+    if (isEditing) {
+      saveRow(row, button);
+      if (addPaymentButton) addPaymentButton.style.display = "inline-block";
+      finalizadaCheckbox.disabled = true;
+    } else {
+      cells.forEach((cell) => {
+        if (cell.cellIndex !== 6) {
+          cell.setAttribute("contenteditable", "true");
+        }
+      });
+      finalizadaCheckbox.disabled = false;
+      button.textContent = "Guardar";
+      button.className = "save-button";
+      if (deleteButton) {
+        deleteButton.textContent = "Cancelar";
+        deleteButton.className = "cancel-button";
+        deleteButton.onclick = () => cancelEdit(row, button, deleteButton);
+      }
+      if (addPaymentButton) addPaymentButton.style.display = "none";
+    }
+  }
+
+  function cancelEdit(row, actionButton, cancelButton) {
+    const abonoCell = row.children[5];
+    const saldoCell = row.children[6];
+    const addPaymentButton = row.querySelector(".add-payment-button") || row.querySelector(".save-abono-button");
+    const editButton = row.querySelector(".edit-button") || row.querySelector(".save-button");
+    const finalizadaCheckbox = row.querySelector(".finalizada-checkbox");
+
+    if (finalizadaCheckbox) {
+      finalizadaCheckbox.checked = finalizadaCheckbox.getAttribute("data-original") === "true";
+      finalizadaCheckbox.disabled = true;
+    }
+
+    row.querySelectorAll("td[contenteditable='true']").forEach((cell) => {
+      const originalValue = cell.getAttribute("data-original");
+      if (originalValue !== null) {
+        cell.textContent = originalValue;
+      }
+      cell.setAttribute("contenteditable", "false");
+    });
+
+    if (actionButton.classList.contains("save-abono-button")) {
+      if (abonoCell) abonoCell.textContent = abonoCell.getAttribute("data-original");
+      if (saldoCell) saldoCell.textContent = saldoCell.getAttribute("data-original");
+      actionButton.textContent = "+ Abono";
+      actionButton.className = "add-payment-button";
+    } else if (actionButton.classList.contains("save-button")) {
+      actionButton.textContent = "Editar";
+      actionButton.className = "edit-button";
+    }
+
+    if (cancelButton) {
+      cancelButton.textContent = "Eliminar";
+      cancelButton.className = "delete-button";
+      cancelButton.onclick = () => deleteOrder(row.children[0].textContent);
+    }
+
+    if (editButton) editButton.style.display = "inline-block";
+    if (addPaymentButton) addPaymentButton.style.display = "inline-block";
+  }
+
+  async function saveRow(row, button) {
+    const id = row.children[0].textContent;
+    const valor = parseFloat(row.children[4].textContent) || 0;
+    const abono = parseFloat(row.children[5].textContent) || 0;
+    const saldo = Math.max(valor - abono, 0);
+    const finalizadaCheckbox = row.querySelector(".finalizada-checkbox");
+
+    const updatedData = {
+      nombreCliente: row.children[1].textContent.trim(),
+      fechaEntrega: row.children[2].textContent,
+      valorTotal: valor,
+      abono: abono,
+      saldo: saldo,
+      celular: row.children[7].textContent,
+      telefono: row.children[8].textContent,
+      observaciones: row.children[9].textContent.trim(),
+      finalizada: finalizadaCheckbox.checked
+    };
+
+    try {
+      const response = await fetch(`${updateUrl}/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(updatedData),
+      });
+
+      if (!response.ok) throw new Error("Error al actualizar la orden.");
+
+      alert("Orden actualizada con éxito.");
+      row.children[6].textContent = saldo;
+      row.querySelectorAll("td[contenteditable='true']").forEach((cell) => {
+        cell.setAttribute("data-original", cell.textContent);
+        cell.setAttribute("contenteditable", "false");
+      });
+
+      finalizadaCheckbox.setAttribute("data-original", finalizadaCheckbox.checked);
+      finalizadaCheckbox.disabled = true;
+
+      button.textContent = "Editar";
+      button.className = "edit-button";
+
+      const cancelButton = row.querySelector(".cancel-button");
+      if (cancelButton) {
+        cancelButton.textContent = "Eliminar";
+        cancelButton.className = "delete-button";
+        cancelButton.onclick = () => deleteOrder(id);
+      }
+    } catch (error) {
+      alert("Error: " + error.message);
+    }
+  }
+
+  // ================== FUNCIONES DE ABONO ==================
+  async function addPayment(id, button) {
+    const row = button.closest("tr");
+    const abonoCell = row.children[5];
+    const saldoCell = row.children[6];
+    const deleteButton = row.querySelector(".delete-button") || row.querySelector(".cancel-button");
+    const editButton = row.querySelector(".edit-button") || row.querySelector(".save-button");
+
+    const isAdding = button.classList.contains("save-abono-button");
+
+    if (isAdding) {
+      const newAbono = parseFloat(abonoCell.textContent) || 0;
+      const currentSaldo = parseFloat(saldoCell.textContent) || 0;
+      if (newAbono <= 0 || newAbono > currentSaldo) {
+        alert("Abono inválido.");
+        return;
+      }
+      const currentAbono = parseFloat(abonoCell.getAttribute("data-original")) || 0;
+      const updatedAbono = currentAbono + newAbono;
+      const newSaldo = Math.max(currentSaldo - newAbono, 0);
+
+      const updatedData = { abono: updatedAbono, saldo: newSaldo };
+
+      try {
+        const response = await fetch(`${updateUrl}/${id}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(updatedData),
+        });
+
+        if (!response.ok) throw new Error("Error al agregar el abono.");
+
+        alert("Abono agregado con éxito.");
+        abonoCell.textContent = updatedAbono;
+        if (saldoCell) saldoCell.textContent = newSaldo;
+        abonoCell.setAttribute("data-original", updatedAbono);
+        saldoCell.setAttribute("data-original", newSaldo);
+
+        button.textContent = "+ Abono";
+        button.className = "add-payment-button";
+
+        if (editButton) editButton.style.display = "inline-block";
+        if (deleteButton) {
+          deleteButton.textContent = "Eliminar";
+          deleteButton.className = "delete-button";
+          deleteButton.onclick = () => deleteOrder(id);
+        }
+      } catch (error) {
+        alert("Error: " + error.message);
+      }
+    } else {
+      abonoCell.setAttribute("data-original", abonoCell.textContent);
+      saldoCell.setAttribute("data-original", saldoCell.textContent);
+      abonoCell.textContent = "";
+      abonoCell.setAttribute("contenteditable", "true");
+
+      row.querySelectorAll("td[contenteditable='true']").forEach((cell) => {
+        if (cell !== abonoCell) cell.setAttribute("contenteditable", "false");
+      });
+
+      button.textContent = "Guardar Abono";
+      button.className = "save-abono-button";
+
+      if (editButton) editButton.style.display = "none";
+      if (deleteButton) {
+        deleteButton.textContent = "Cancelar";
+        deleteButton.className = "cancel-button";
+        deleteButton.onclick = () => cancelEdit(row, button, deleteButton);
+      }
+    }
+  }
+
+  // ================== FUNCIONES DE REIMPRESIÓN ==================
+  async function reprintOrder(id) {
+    const options = [
+      "Cliente y Negocio",
+      "Solo Cliente", 
+      "Solo Negocio"
+    ];
+    
+    const choice = prompt(`¿Qué desea reimprimir para la orden ${id}?\n\n1 - Cliente y Negocio\n2 - Solo Cliente\n3 - Solo Negocio\n\nIngrese el número (1, 2 o 3):`);
+    
+    if (!choice || !["1", "2", "3"].includes(choice.trim())) {
+      return; // Cancelado o entrada inválida
+    }
+    
+    const reprintType = choice.trim();
+    let typeDescription = "";
+    
+    switch(reprintType) {
+      case "1": typeDescription = "Cliente y Negocio"; break;
+      case "2": typeDescription = "Solo Cliente"; break;
+      case "3": typeDescription = "Solo Negocio"; break;
+    }
+    
+    if (!confirm(`¿Está seguro de reimprimir "${typeDescription}" para la orden ${id}?`)) {
+      return;
+    }
+    
+    try {
+      const response = await fetch(`http://${urlLocal}/reprintOrder/${id}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ reprintType: reprintType })
+      });
+      
+      if (!response.ok) throw new Error("Error al reimprimir la orden.");
+      
+      const result = await response.json();
+      alert(`Reimpresión exitosa: ${result.message}`);
+    } catch (error) {
+      alert("Error: " + error.message);
+    }
+  }
+
+  // ================== FUNCIONES DE ELIMINACIÓN ==================
+  async function deleteOrder(id) {
+    if (!confirm("¿Estás seguro de que quieres eliminar esta orden?")) return;
+    try {
+      const response = await fetch(`${deleteUrl}/${id}`, { method: "DELETE" });
+      if (!response.ok) throw new Error("Error al eliminar la orden.");
+      alert("Orden eliminada con éxito.");
+      await loadOrders();
+    } catch (error) {
+      alert("Error: " + error.message);
+    }
+  }
+
+  // ================== BÚSQUEDA ==================
+  const searchInput = document.getElementById("searchInput");
+  const searchField = document.getElementById("searchField");
+
+  searchInput.addEventListener("input", function () {
+    const searchTerm = this.value.toLowerCase();
+    const selectedField = searchField.value;
+    const rows = tableBody.querySelectorAll("tr");
+
+    rows.forEach((row) => {
+      const id = row.children[0].textContent.toLowerCase();
+      const nombre = row.children[1].textContent.toLowerCase();
+      const celular = row.children[7].textContent.toLowerCase();
+
+      let fieldToSearch = "";
+
+      if (selectedField === "id") {
+        fieldToSearch = id;
+      } else if (selectedField === "nombre") {
+        fieldToSearch = nombre;
+      } else if (selectedField === "celular") {
+        fieldToSearch = celular;
+      }
+
+      const matches = fieldToSearch.includes(searchTerm);
+      row.style.display = matches ? "" : "none";
+    });
+  });
+
+  // ================== VALIDACIÓN DE CAMPOS NUMÉRICOS ==================
+  document.addEventListener("input", (event) => {
+    const target = event.target;
+    if (
+      target.contentEditable === "true" &&
+      (target.cellIndex === 4 || target.cellIndex === 5 || target.cellIndex === 7)
+    ) {
+      const cursorPosition = target.selectionStart; // Guarda la posición del cursor
+      target.textContent = target.textContent.replace(/[^0-9]/g, "");
+      setCursorToEnd(target, cursorPosition); // Restaura la posición del cursor
+    }
+  });
+
+  // ================== UTILIDADES ==================
+  function setCursorToEnd(element) {
+    const range = document.createRange();
+    const selection = window.getSelection();
+    range.selectNodeContents(element);
+    range.collapse(false);
+    selection.removeAllRanges();
+    selection.addRange(range);
+  }
+</script>
+</body>
+
+</html>
